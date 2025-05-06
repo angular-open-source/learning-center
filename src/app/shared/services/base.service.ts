@@ -1,49 +1,27 @@
-import {environment} from "../../../environments/environment";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
-import {catchError, Observable, retry, throwError} from "rxjs";
-import {inject} from "@angular/core";
+
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {environment} from '../../../environments/environment';
+import {inject} from '@angular/core';
+import {catchError, Observable, retry, throwError} from 'rxjs';
 
 /**
- * Base service class for CRUD operations
- * @description
- * This class provides the basic CRUD operations for a resource.
- * @remarks
- * It is intended to be extended by other services.
+ * Abstract base service class providing common CRUD operations for REST API endpoints.
+ * @template T The type of resource this service manages
  */
-export class BaseService<T> {
-  /**
-   * @property httpOptions
-   * @description
-   * HTTP headers for the requests. The content type is set to JSON.
-   */
-  protected httpOptions = { headers: new HttpHeaders({'Content-Type': 'application/json'}) };
-
-  /**
-   * @property http
-   * @description
-   * HTTP client for making requests to the server.
-   */
+export abstract class BaseService<T> {
+  /** HTTP headers configuration for JSON communication */
+  protected httpOptions = { headers: new HttpHeaders({'Content-Type': 'application/json'})};
+  /** Base URL for the server API */
+  protected serverBaseUrl: string =  `${environment.serverBaseUrl}`;
+  /** Endpoint path for the specific resource */
+  protected resourceEndpoint: string = '/resources';
+  /** HTTP client for making API requests */
   protected http: HttpClient = inject(HttpClient);
 
   /**
-   * @property basePath
-   * @description
-   * Base path for the server. This is the URL of the server.
-   */
-  protected basePath: string = `${environment.serverBaseUrl}`;
-
-  /**
-   * @property resourceEndPoint
-   * @description
-   * The endpoint for the resource. This is the URL path for the resource.
-   */
-  protected resourceEndPoint: string = '/resources';
-
-  /**
-   * @method handleError
-   * @description
-   * Handles the error response from the server. It logs the error to the console and returns an observable with the error.
-   * @param {HttpErrorResponse} error  - The error response from the server.
+   * Handles HTTP errors and transforms them into an Observable error
+   * @param error - The HTTP error response
+   * @returns An Observable error with a user-friendly message
    */
   protected handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
@@ -55,60 +33,61 @@ export class BaseService<T> {
   }
 
   /**
-   * @method resourcePath
-   * @description
-   * Build and returns the full path for the resource.
-   * @returns {string} The full path for the resource.
+   * Constructs the full resource URL path
+   * @returns The complete URL for the resource endpoint
    */
   protected resourcePath(): string {
-    return `${this.basePath}${this.resourceEndPoint}`;
+    return `${this.serverBaseUrl}${this.resourceEndpoint}`;
   }
 
   /**
-   * @method create
-   * @description
-   * Creates a new resource on the server.
-   * @param   {any} item - The item to be created.
-   * @returns {Observable<T>} - An observable with the created item.
+   * Creates a new resource
+   * @param resource - The resource to create
+   * @returns An Observable of the created resource
    */
-  public create(item: any): Observable<T> {
-    return this.http.post<T>(this.resourcePath(), JSON.stringify(item), this.httpOptions)
+  public create(resource: T): Observable<T> {
+    return this.http.post<T>(this.resourcePath(), JSON.stringify(resource), this.httpOptions)
       .pipe(retry(2), catchError(this.handleError));
   }
 
   /**
-   * @method delete
-   * @description
-   * Deletes a resource from the server.
-   * @param   {any} id - The id of the resource to be deleted.
-   * @returns {Observable<any>} - An observable with the response from the server.
+   * Deletes a resource by ID
+   * @param id - The ID of the resource to delete
+   * @returns An Observable of the deletion result
    */
   public delete(id: any): Observable<any> {
     return this.http.delete(`${this.resourcePath()}/${id}`, this.httpOptions)
       .pipe(retry(2), catchError(this.handleError));
   }
+  //SACAR EL 2 DEL RETRY NO HARDCODEAR!!!!
 
   /**
-   * update
-   * @description
-   * Updates a resource on the server.
-   * @param {any} id - The id of the resource to be updated.
-   * @param {any} item - The item to be updated.
-   * @returns {Observable<T>} - An observable with the updated item.
+   * Updates an existing resource
+   * @param id - The ID of the resource to update
+   * @param resource - The updated resource data
+   * @returns An Observable of the updated resource
    */
-  public update(id: any, item: any): Observable<T> {
-    return this.http.put<T>(`${this.resourcePath()}/${id}`, JSON.stringify(item), this.httpOptions)
+  public update(id: any, resource: T): Observable<T> {
+    return this.http.put<T>(`${this.resourcePath()}/${id}`, JSON.stringify(resource), this.httpOptions)
       .pipe(retry(2), catchError(this.handleError));
   }
 
   /**
-   * @method getAll
-   * @description
-   * Gets all the resources from the server.
-   * @returns {Observable<Array<T>>} - An observable with the array of resources.
+   * Retrieves all resources
+   * @returns An Observable array of all resources
    */
   public getAll(): Observable<Array<T>> {
     return this.http.get<Array<T>>(this.resourcePath(), this.httpOptions)
+      .pipe(retry(2), catchError(this.handleError));
+  }
+
+  /**
+   * Retrieves a resource by ID
+   * @param id - The ID of the resource to retrieve
+   * @returns An Observable of the requested resource
+   */
+  public getById(id: any): Observable<T> {
+    return this.http.get<T>(`${this.resourcePath()}/${id}`, this.httpOptions)
       .pipe(retry(2), catchError(this.handleError));
   }
 }

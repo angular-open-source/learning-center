@@ -1,9 +1,17 @@
+
 {
   "profiles": [],
   "users": [],
   "students": [],
-  "courses": [],
+  "courses": [
+    {
+      "id": 1,
+      "title": "Sample",
+      "description": "Sample Course"
+    }
+  ],
   "enrollments": [],
   "progress-record-items": [],
   "learning-path-items": []
 }
+

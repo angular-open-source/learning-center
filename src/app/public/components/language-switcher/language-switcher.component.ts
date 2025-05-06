@@ -4,6 +4,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-language-switcher',
+  standalone: true,
   imports: [
     MatButtonToggleModule
   ],
@@ -11,8 +12,8 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
   styleUrl: './language-switcher.component.css'
 })
 export class LanguageSwitcherComponent {
-  selectedLanguage = 'en';
-  languages = ['en','es']
+  selectedLanguage: string = 'en';
+  languages: string[] = ['en','es']
 
   constructor(private translate: TranslateService) {
     this.selectedLanguage = translate.currentLang

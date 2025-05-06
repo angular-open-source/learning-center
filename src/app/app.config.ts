@@ -13,6 +13,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({eventCoalescing: true}),
     provideHttpClient(),
+    //no olvidar el providerRoutes
     provideRouter(routes),
     provideTranslateService({
       loader: {
